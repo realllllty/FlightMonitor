@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ChartService } from '../chart/chart.service';
 import { FlightService } from '../flight/flight.service';
@@ -7,7 +7,7 @@ import { NotifyService } from '../notify/notify.service';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable()
-export class FlightSchedulerService implements OnModuleInit {
+export class FlightSchedulerService {
   private readonly logger = new Logger(FlightSchedulerService.name);
 
   constructor(
@@ -16,19 +16,6 @@ export class FlightSchedulerService implements OnModuleInit {
     private readonly notifyService: NotifyService,
     private readonly chartService: ChartService,
   ) {}
-
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Bootstrap run started: triggering immediate flight check and chart push.');
-
-    try {
-      await this.runHourlyCheck();
-      await this.runFiveHourReport();
-      this.logger.log('Bootstrap run completed.');
-    } catch (error) {
-      const message = error instanceof Error ? error.stack ?? error.message : String(error);
-      this.logger.error(`Bootstrap run failed: ${message}`);
-    }
-  }
 
   @Cron(CronExpression.EVERY_HOUR)
   async runHourlyCheck(): Promise<void> {
